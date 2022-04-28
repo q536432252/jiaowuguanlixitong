@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 编写接口对应的 Mapper.xml 文件。需要导入MyBatis的包； -->
+
+<!--一个mapper.xml  对应一个mapper接口-->
+<mapper namespace="com.lin.dao.UserLoginMapper">
+
+    <!--使用idea与数据库关联起来会方便    -->
+    <!--Mapper的方法名 要和id对应起来-->
+    <!--ParameterType 传过来的参数类型    -->
+    <!--#{} 代表传过来的参数    -->
+    <insert id="insert" parameterType="UserLogin">
+        insert into jiaowuguanlixitong.userlogin (userName, password, role)
+        VALUES (#{userName}, #{password}, #{role});
+    </insert>
+
+   <!-- <delete id="deleteByID" parameterType="int">
+        delete from jiaowuguanlixitong.userlogin where userID = #{userID};
+    </delete>-->
+
+    <update id="updateByID" parameterType="UserLogin">
+        update jiaowuguanlixitong.userlogin
+        set userName = #{userName}, password = #{password}, role = #{role}
+        where userID = #{userID};
+    </update>
+
+    <!--select强烈建议不要使用*号,需要查询什么列,就写什么列    -->
+    <!--resultType 返回的类型    -->
+    <select id="selectByID" resultType="UserLogin">
+        select userID, userName, password, role
+        from jiaowuguanlixitong.userlogin
+        where userID = #{userID};
+    </select>
+
+    <select id="selectAll" resultType="UserLogin">
+        select userID, userName, password, role
+        from jiaowuguanlixitong.userlogin;
+    </select>
+
+    <!--    mapper 写完了第一件事 是绑定到mybatis-config里面 -->
+</mapper>
+

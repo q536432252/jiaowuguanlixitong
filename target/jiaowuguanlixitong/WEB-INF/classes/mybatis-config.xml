@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+
+
+   <!-- <settings>
+        <setting name="logImpl" value="LOG4J"/>
+    </settings>-->
+
+    <!-- 为java的主体类 取别名 -->
+    <typeAliases>
+        <!-- 别名方式2，自动扫描，将JAVA类的类名作为类的类别名 -->
+        <package name="com.lin.pojo"/>
+    </typeAliases>
+
+    <!--pagehelper分页插件-->
+    <plugins>
+        <!--5.0以后的配置-->
+        <plugin interceptor="com.github.pagehelper.PageInterceptor">
+            <!--决定数据库的方言 有mysql oracle等-->
+            <property name="helperDialect" value="mysql"/>
+            <!--分页合理化参数，默认值为false。当该参数设置为 true 时，pageNum<=0 时会查询第一页， pageNum>pages（超过总数时），会查询最后一页。-->
+            <property name="reasonable" value="true"/>
+        </plugin>
+    </plugins>
+
+
+    <!--mapper.xml 所在的包-->
+    <mappers>
+        <package name="com.lin.dao"/>
+    </mappers>
+
+
+
+
+
+</configuration>

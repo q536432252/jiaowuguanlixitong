@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+	http://www.springframework.org/schema/beans/spring-beans.xsd
+	http://www.springframework.org/schema/context
+	http://www.springframework.org/schema/context/spring-context.xsd
+	http://www.springframework.org/schema/aop
+	http://www.springframework.org/schema/aop/spring-aop.xsd
+	http://www.springframework.org/schema/tx
+	http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+    <!--以注解的方式来注册自定义realm行不通，todo ，目前猜测是web容器启动顺序的问题-->
+    <!--shiro和spring mvc整合，shiro自定义了realm。
+    其中自定义的realm里面不能使用@Autowired注解标签注入相关的用户service。
+    原来shiro 自定义realm的认证阶段属于filter，当时的spring bean还没有读取进来-->
+    <!--组件扫描器-->
+    <context:component-scan base-package="com.lin.realm" />
+
+    <!-- 注册自定义realm -->
+    <bean id="loginRealm" class="com.lin.realm.LoginRealm"/>
+
+
+
+
+    <!-- 注册凭证匹配器 -->
+    <bean id="credentialsMatcher" class="org.apache.shiro.authc.credential.HashedCredentialsMatcher">
+        <property name="hashAlgorithmName" value="md5"/>
+        <property name="hashIterations" value="2"/>
+    </bean>
+
+    <!--Shiro中最核心的安全管理器的配置-->
+    <!--
+    	SecurityManager：安全管理器；即所有与安全有关的操作都会与SecurityManager交互；
+		且它管理着所有Subject；可以看出它是Shiro 的核心，它负责与后边介绍的其他组件进行交互
+     -->
+    <bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+        <!--关联一个会话管理器，不配置为默认-->
+        <!--<property name="sessionManager" ref="sessionManager"-->
+        <!--缓存管理，不配置为默认-->
+        <!--<property name="cacheManager" ref="cacheManager"-->
+
+        <!--关联一个认证授权的域(指定认证授权规则)-->
+        <!--配置自定义Realm-->
+        <!--loginRealm 使用扫描器扫描注册成功了-->
+        <property name="realm" ref="loginRealm" />
+        <!-- <property name="sessionMode" value="native"/> -->
+    </bean>
+
+    <!-- shiro过滤器bean，id要和web.xml中filter-name一致 -->
+    <bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+        <!--必须配置  安全管理器-->
+        <property name="securityManager" ref="securityManager" />
+
+        <!-- 要求登录时的链接(登录页面地址)，非必须的属性，默认会自动寻找Web工程根目录下的"/login.jsp"页面 -->
+        <!--<property name="loginUrl" value="/login"/>-->
+
+        <!--认证（登录）成功后跳转的页面-->
+        <!--<property name="successUrl" value="/home"/>-->
+
+        <!--访问需要权限的网页，但是此时未授权时，跳转的页面-->
+        <!--<property name="unauthorizedUrl" value="/403"/>-->
+
+
+        <!--anon:匿名过滤器-->
+        <!--把页面 和 过滤器 建立起对应关系-->
+        <property name="filterChainDefinitions">
+            <value>
+                <!--#这里相当于ini配置文件中的[urls]
+                # url = 拦截器[参数]，拦截器 (可以有多个拦截器)
+                # /techer/** = authc, perms[document:read]
+                # 如果用户没有该角色，然后访问该 路径 会报 401错误
+                &lt;!&ndash;写法： /index.jsp = anon   /admin/** = authc, roles[admin]     &ndash;&gt;
+                &lt;!&ndash;常用拦截器： anon(不需要登录即可访问)
+                                authc(如果没登录会跳转到相应的登录界面)&ndash;&gt;
+
+                &lt;!&ndash;  perms (需要权限)&ndash;&gt;
+
+                /index.jsp = anon
+                /login.jsp = anon
+
+                /admin/** = authc, roles[admin]
+                /techer/** = authc, roles[teacher]
+                /student/** = authc, roles[student]
+
+                # 当访问login时，不用进行认证（anon表示匿名）
+                /login = anon
+
+                /logout = logout
+
+                &lt;!&ndash;配置静态资源可以匿名访问&ndash;&gt;
+                /css/** = anon
+                /js/** = anon
+                /images/** = anon
+                /fonts/** = anon
+
+                # 除了上面额 /login 可以匿名访问，其他路径都需要登录访问
+                # 如果没登录，就访问其他路径会跳转到 /login 登录
+
+                /** = authc-->
+
+                /admin/** = authc, roles[admin]
+                /teacher/** = authc, roles[teacher]
+                /student/** = authc, roles[student]
+
+                /index = anon
+                /login = anon
+                /logout = logout
+
+                # 配置静态资源可以匿名访问
+                /css/** = anon
+                /js/** = anon
+                /images/** = anon
+                /fonts/** = anon
+
+
+
+                /** = authc
+
+                <!--/** = authc-->
+            </value>
+        </property>
+    </bean>
+
+
+
+    <!-- 生命周期 -->
+    <bean id="lifecycleBeanPostProcessor" class="org.apache.shiro.spring.LifecycleBeanPostProcessor" />
+
+    <!-- 启用shiro注解 -->
+    <!--<bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator" depends-on="lifecycleBeanPostProcessor"/>-->
+    <bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"
+          depends-on="lifecycleBeanPostProcessor">
+        <property name="proxyTargetClass" value="true"/>
+    </bean>
+    <bean class="org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor">
+        <property name="securityManager" ref="securityManager"/>
+    </bean>
+
+
+</beans>

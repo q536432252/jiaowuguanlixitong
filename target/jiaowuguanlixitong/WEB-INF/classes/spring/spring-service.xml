@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+   http://www.springframework.org/schema/beans/spring-beans.xsd
+   http://www.springframework.org/schema/context
+   http://www.springframework.org/schema/context/spring-context.xsd">
+
+
+    <!--组件扫描，如果想要类被组件扫描，扫描到，并在Spring容器中注册的话
+   必须在类名上添加上注解 @Repository、@Service、@Controller、@Component （这四个注解功能一样，名字不同只是为了区分不同功能）
+   @Component 是通用组件
+   -->
+    <!-- 扫描serviceImpl实现类相关的注解（bean） -->
+    <context:component-scan base-package="com.lin.service.impl" />
+
+    <!--bean就是一个对象-->
+    <!--set注入，通过set方法可以完成属性赋值，包括简单的属性赋值、引用类型赋值-->
+    <!--简单的属性赋值 <property name="变量名" value="值"/>-->
+    <!--引用类型赋值 <property name="变量名" ref="bean的id"/>-->
+
+    <!--studentServiceImpl注入到IOC容器中-->
+    <!--如果有给service实现类加@Service注解，就不需要-->
+<!--    <bean id="studentServiceImpl" class="com.lin.service.impl.StudentServiceImpl">-->
+        <!--如有有给studentServiceImpl属性加@Autowired注解，就不需要-->
+        <!--这里的name指的是当前这个bean(studentServiceImpl)的属性studentMapper-->
+        <!--这里的ref引用指向另一个bean的id(studentMapper)已经被spring-dao.xml动态注入了 -->
+<!--        <property name="studentMapper" ref="studentMapper"/>-->
+<!--    </bean>-->
+
+    <!-- 配置事务管理器 -->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <!-- 注入数据库连接池 -->
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+
+</beans>

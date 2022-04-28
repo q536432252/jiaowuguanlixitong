@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 编写接口对应的 Mapper.xml 文件。需要导入MyBatis的包； -->
+
+<!--一个mapper.xml  对应一个mapper接口-->
+<mapper namespace="com.lin.dao.CourseMapper">
+
+    <!--使用idea与数据库关联起来会方便    -->
+    <!--Mapper的方法名 要和id对应起来-->
+    <!--ParameterType 传过来的参数类型    -->
+    <!--#{} 代表传过来的参数    -->
+    <insert id="insert" parameterType="Course">
+        insert into jiaowuguanlixitong.course ( courseName, teacherID, courseTime, classRoom, courseWeek, courseType, collegeID, score)
+        VALUES (#{courseName}, #{teacherID}, #{courseTime}, #{classRoom}, #{courseWeek}, #{courseType}, #{collegeID}, #{score});
+    </insert>
+
+    <delete id="deleteByID" parameterType="int">
+        delete from jiaowuguanlixitong.course where courseID = #{courseID};
+    </delete>
+
+    <update id="updateByID" parameterType="Course">
+        update jiaowuguanlixitong.course
+        set courseName = #{courseName}, teacherID = #{teacherID}, courseTime = #{courseTime}, classRoom = #{classRoom}, courseWeek = #{courseWeek}, courseType = #{courseType},collegeID = #{collegeID},score = #{score},
+        where courseID = #{courseID};
+    </update>
+
+    <!--select强烈建议不要使用*号,需要查询什么列,就写什么列    -->
+    <!--resultType 返回的类型    -->
+    <select id="selectByID" resultType="Course">
+        select courseid, coursename, teacherid, coursetime, classroom, courseweek, coursetype, collegeid, score
+        from jiaowuguanlixitong.course
+        where courseid = #{courseid};
+    </select>
+
+    <select id="selectAll" resultType="Course">
+        select courseID, courseName, teacherID, courseTime, classRoom, courseWeek, courseType, collegeID, score
+        from jiaowuguanlixitong.course;
+    </select>
+
+    <!--    mapper 写完了第一件事 是绑定到mybatis-config里面 -->
+</mapper>
+

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 编写接口对应的 Mapper.xml 文件。需要导入MyBatis的包； -->
+
+<!--一个mapper.xml  对应一个mapper接口-->
+<mapper namespace="com.lin.dao.TeacherMapper">
+
+    <!--使用idea与数据库关联起来会方便    -->
+    <!--Mapper的方法名 要和id对应起来-->
+    <!--ParameterType 传过来的参数类型    -->
+    <!--#{} 代表传过来的参数    -->
+    <insert id="insert" parameterType="Teacher">
+        insert into jiaowuguanlixitong.teacher (userName, sex, birthYear, degree, title, grade, collegeID)
+        VALUES (#{userName}, #{sex}, #{birthYear}, #{degree}, #{title}, #{grade}, #{collegeID});
+    </insert>
+
+    <delete id="deleteByID" parameterType="int">
+        delete from jiaowuguanlixitong.teacher where userID = #{userID};
+    </delete>
+
+    <update id="updateByID" parameterType="Teacher">
+        update jiaowuguanlixitong.teacher
+        set userName = #{userName}, sex = #{sex}, birthYear = #{birthYear}, degree = #{degree}, title = #{title}, grade = #{grade}, collegeID = #{collegeID}
+        where userID = #{userID};
+    </update>
+
+    <!--select强烈建议不要使用*号,需要查询什么列,就写什么列    -->
+    <!--resultType 返回的类型    -->
+    <select id="selectByID" resultType="Teacher">
+        select userID, userName, sex, birthYear, degree, title, grade, collegeID
+        from jiaowuguanlixitong.teacher
+        where userID = #{userID};
+    </select>
+
+    <select id="selectAll" resultType="Teacher">
+        select userid, username, sex, birthyear, degree, title, grade, collegeid
+        from jiaowuguanlixitong.teacher;
+    </select>
+
+    <!--    mapper 写完了第一件事 是绑定到mybatis-config里面 -->
+</mapper>
+

@@ -1,0 +1,127 @@
+<!DOCTYPE web-app PUBLIC
+ "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+ "http://java.sun.com/dtd/web-app_2_3.dtd" >
+
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
+         version="4.0">
+  <display-name>Archetype Created Web Application</display-name>
+
+  <!--listener > filter > servlet-->
+  <!--我们先了解一下web.xml的作用：
+
+  1、初始化spring核心：通过ContextLoaderListener在web app启动的时候，获取contextConfigLocation配置文件的文件名applicationContext.xml，并进行Spring相关初始化工作
+
+  2、配置拦截器：springmvc的核心，有任何访问，都被DispatcherServlet所拦截，然后分发处理。
+
+  3、配置过滤器-->
+
+  <!--在web.xml中，ContextLoaderListener和DispatcherServlet的书写顺序不会影响相应的xml文件加载顺序。ContextLoaderListener中的xml先加载，DispatcherServlet中的xml后加载。
+  ContextLoaderListener中如果contextConfigLocation通过模糊匹配到多个xml文件时，xml按照文件命名顺序加载。但是如果contextConfigLocation逐个指定了具体加载某个xml，则会按照其指定顺序加载。
+  同一个spring的xml文件中，bean的加载顺序按照书写顺序加载
+  通过component-scan扫描的方式加载bean，在扫描范围内按照class的命名顺序加载
+  如果bean之间的创建存在依赖关系，则被依赖的bean会被优先创建-->
+  <!--1、通过ContextLoaderListener获取contextConfigLocation配置的文件路径，加载spring容器-->
+  <context-param>
+    <param-name>contextConfigLocation</param-name>
+    <!--
+    classpath:springconfig.xml ,这个格式的配置为读取本项目classpath下的文件
+    classpath*:springconfig.xml 这个格式的配置为读取本项目下或者是jar包的classpath下的配置文件。
+    -->
+    <param-value>classpath:spring/applicationContext.xml</param-value>
+    <!--<param-value>classpath:spring/applicationContext.xml</param-value>-->
+  </context-param>
+
+  <!-- 监听器 -->
+  <!-- 注册ContextLoaderListener：监听ServletContext，当其初始化时，创建spring容器对象，
+      并且将spring容器对象放到servletcontext作用域当中	 -->
+  <listener>
+    <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+  </listener>
+
+  <!--encodingFilter-->
+  <!--spring为我们提供的乱码过滤器-->
+  <!--filter只对post请求方式过滤****，而对get请求方式不起效果-->
+  <filter>
+    <filter-name>encodingFilter</filter-name>
+    <filter-class>
+      org.springframework.web.filter.CharacterEncodingFilter
+    </filter-class>
+    <init-param>
+      <param-name>encoding</param-name>
+      <param-value>utf-8</param-value>
+    </init-param>
+  </filter>
+  <filter-mapping>
+    <filter-name>encodingFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
+
+  <!--name要和 applicationContext.xml中的对应的bean的id一致 -->
+  <!--Shiro过滤器 shiro入口，拦截我们所有的请求-->
+  <!--该过滤器的作用：判断对某个页面的请求是否需要经过认证和授权-->
+  <!--如果不需要认证：直接放行，让你去访问-->
+  <!--如果需要认证（登录）：会拦截该请求，然后重定向到登录页面-->
+  <!--如果需要授权（权限）：会拦截该请求，会验证你是否具有相关权限，如有放行，如没有，重定向到未授权的页面-->
+  <filter>
+    <!--name必须要叫做shiroFilter-->
+    <filter-name>shiroFilter</filter-name>
+    <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+    <!-- 让spring控制shiro过滤器的生命周期 -->
+    <!--  <init-param>
+          <param-name>targetFilterLifecycle</param-name>
+          <param-value>true</param-value>
+      </init-param>-->
+    <!-- 设置spring容器filter的bean id，如果不设置则找与filter-name一致的bean-->
+    <!--   <init-param>
+           <param-name>targetBeanName</param-name>
+           <param-value>shiroFilter</param-value>
+       </init-param>-->
+  </filter>
+
+  <filter-mapping>
+    <filter-name>shiroFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
+  <!--springMVC前端控制器加载-->
+  <!--注册中央处理器DispatcherServlet-->
+  <!--有任何访问，都被DispatcherServlet所拦截，-->
+  <servlet>
+    <servlet-name>DispatcherServlet</servlet-name>
+    <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+    <!--为中央调度器设置查找 SpringMVC 配置文件路径，及文件名。-->
+    <init-param>
+      <!--打开 DispatcherServlet 的源码，其继承自 FrameworkServlet，而该类中有一个属性
+contextConfigLocation，用于设置 SpringMVC 配置文件的路径及文件名。该初始化参数的属性
+就来自于这里。-->
+      <param-name>contextConfigLocation</param-name>
+      <!-- springmvc的配置文件路径-->
+      <!--一定要注意:我们这里加载的是总的配置文件，之前被这里坑了！-->
+      <param-value>classpath:spring/applicationContext.xml</param-value>
+      <!--<param-value>classpath:spring/spring-shiro.xml</param-value>-->
+    </init-param>
+    <!--是否在Web服务器(这里是TomCat)启动时调用执行该Servlet的init()方法(创建Servlet实例)，而不是在真正访问时才创建-->
+    <!--当值小于 0 或者没有指定时，则表示该 Servlet 在真正被使用时才会去创建-->
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>DispatcherServlet</servlet-name>
+    <url-pattern>/</url-pattern>
+  </servlet-mapping>
+
+
+  <!--Session过期时间-->
+  <session-config>
+    <session-timeout>15</session-timeout>
+  </session-config>
+
+  <!--默认首页-->
+  <welcome-file-list>
+    <welcome-file>login.jsp</welcome-file>
+  </welcome-file-list>
+
+
+
+</web-app>

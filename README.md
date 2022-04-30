@@ -1,2 +1,2 @@
-# 20220105jiaowuguanlixitong
+# jiaowuguanlixitong
 毕设 教务管理系统
